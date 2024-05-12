@@ -1,0 +1,281 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <!-- <script defer src="{% static 'index.js' %}"></script> -->
+    <title>Solar Checker</title>
+</head>
+
+<body>
+    <header>
+        <h1 class="logo">Solar<span>Checker</span></h1>
+    </header>
+    <main>
+        <section class="query">
+            <h2>Daily Power Consumption (kWh)</h2>
+            <form method="post" id="power-form">
+                {% csrf_token %}
+                <h3>Enter your average power consuption per day</h3>
+                <div class="form-control">
+                    <label for="power-consumption">Power Consumption (kWh)</label>
+                    <input type="number" id="power-consumption" name="power-consumption">
+                    <button type="submit">Check</button>
+                </div>
+            </form>
+
+            <div class="or">
+                <span></span>
+                <p>Or</p>
+                <span></span>
+            </div>
+            <form method="post" id="energy-form">
+                {% csrf_token %}
+                <h3>Select your regularly used appliances for an automated calculation.</h3>
+                <!-- Refrigerator -->
+                <div class="form-control-2">
+                    <div class="appliance-div">
+                        <input class="appliance" type="checkbox" id="refrigerator" name="refrigerator">
+                        <label class="appliance-label" for="refrigerator">Refrigerator</label>
+                    </div>
+                    <div>
+                        <input class="appliance-amount" type="number" id="refrigerator-amt" placeholder="Amount"
+                            name="refrigerator-amt">
+                    </div>
+                    <div>
+                        <input class="appliance-load" type="number" id="refrigerator-load" placeholder="Load"
+                            step="0.01" name="refrigerator-load">
+                    </div>
+                    <div>
+                        <input class="appliance-hours" type="number" id="refrigerator-hours" placeholder="Hours/day"
+                            name="refrigerator-hours">
+                    </div>
+                </div>
+                <!-- Bulb -->
+                <div class="form-control-2">
+                    <div class="appliance-div">
+                        <input class="appliance" type="checkbox" id="bulb" name="bulb">
+                        <label class="appliance-label" for="bulb">Bulb</label>
+                    </div>
+                    <div>
+                        <input class="appliance-amount" type="number" id="bulb-amt" placeholder="Amount"
+                            name="bulb-amt">
+                    </div>
+                    <div>
+                        <input class="appliance-load" type="number" id="bulb-load" placeholder="Load" name="bulb-load"
+                            step="0.01">
+                    </div>
+                    <div>
+                        <input class="appliance-hours" type="number" id="bulb-hours" placeholder="Hours/day"
+                            name="bulb-hours">
+                    </div>
+                </div>
+                <!-- Laptop -->
+                <div class="form-control-2">
+                    <div class="appliance-div">
+                        <input class="appliance" type="checkbox" id="laptop" name="laptop">
+                        <label class="appliance-label" for="laptop">Laptop</label>
+                    </div>
+                    <div>
+                        <input class="appliance-amount" type="number" id="laptop-amt" placeholder="Amount"
+                            name="laptop-amt">
+                    </div>
+                    <div>
+                        <input class="appliance-load" type="number" id="laptop-load" placeholder="Load" step="0.01"
+                            name="laptop-load">
+                    </div>
+                    <div>
+                        <input class="appliance-hours" type="number" id="laptop-hours" placeholder="Hours/day"
+                            name="laptop-hours">
+                    </div>
+                </div>
+                <!-- Television -->
+                <div class="form-control-2">
+                    <div class="appliance-div">
+                        <input class="appliance" type="checkbox" id="television" name="television">
+                        <label class="appliance-label" for="television">Television</label>
+                    </div>
+                    <div>
+                        <input class="appliance-amount" type="number" id="television-amt" placeholder="Amount"
+                            name="television-amt">
+                    </div>
+                    <div>
+                        <input class="appliance-load" type="number" id="television-load" placeholder="Load" step="0.01"
+                            name="television-load">
+                    </div>
+                    <div>
+                        <input class="appliance-hours" type="number" id="television-hours" placeholder="Hours/day"
+                            name="television-hours">
+                    </div>
+                </div>
+                <!-- Fan -->
+                <div class="form-control-2">
+                    <div class="appliance-div">
+                        <input class="appliance" type="checkbox" id="fan" name="fan">
+                        <label class="appliance-label" for="fan">Fan</label>
+                    </div>
+                    <div>
+                        <input class="appliance-amount" type="number" id="fan-amt" placeholder="Amount" name="fan-amt">
+                    </div>
+                    <div>
+                        <input class="appliance-load" type="number" id="fan-load" placeholder="Load" name="fan-load"
+                            step="0.01">
+                    </div>
+                    <div>
+                        <input class="appliance-hours" type="number" id="fan-hours" placeholder="Hours/day"
+                            name="fan-hours">
+                    </div>
+                </div>
+                <!-- Submit Button -->
+                <button class="submit-2" type="submit">Check</button>
+            </form>
+
+        </section>
+
+        <section class="result">
+            <div class="h">
+                <h2>Results</h2>
+
+                <button type="button" id="close-btn">X</button>
+            </div>
+
+            <div class="result-div">
+
+                <!-- Add more sections as needed -->
+                <div>
+                    <p>Total Load</p>
+                    <p>1230 kWh</p>
+                </div>
+
+                <div>
+                    <p>Recommended Inverter Rating</p>
+                    <p>2500 W</p>
+                </div>
+
+                <div>
+                    <p>Number of Panels</p>
+                    <p>5</p>
+                </div>
+
+            </div>
+        </section>
+
+        <div class="result-overlay"></div>
+    </main>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Select the form with the specific ID
+        const energyForm = document.querySelector('#energy-form');
+
+        // Attach a submit event listener to the selected form
+        energyForm.onsubmit = function (event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Collect the form data
+            let formData = new FormData(this);
+
+            // Make the API call
+            fetch('/api/calculate_energy/', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the results section with the new data
+                    document.querySelector('.result-div').innerHTML = `
+                <div>
+                    <p>Total Load</p>
+                    <p>${data.total_daily_energy_consumption_kWh} kWh</p>
+                </div>
+                <div>
+                    <p>Number of Panels</p>
+                    <p>${data.number_of_solar_panels_needed}</p>
+                </div>
+                <div>
+                    <p>Number of Batteries</p>
+                    <p>${data.number_of_batteries_needed}</p>
+                </div>
+            `;
+
+                    // Display the results section
+                    document.querySelector('.result').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        };
+
+        // Close button handler
+        document.querySelector('#close-btn').onclick = function () {
+            document.querySelector('.result').style.display = 'none';
+        };
+    });
+
+
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Select the form with the specific ID
+        const powerForm = document.querySelector('#power-form');
+
+        // Attach a submit event listener to the selected form
+        powerForm.onsubmit = function (event) {
+            // Prevent the default form submission
+            event.preventDefault();
+
+            // Collect the form data
+            let formData = new FormData(this);
+
+            // Make the API call
+            fetch('/api/calculate_solar_setup/', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Check for errors in the response
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+
+                    // Update the results section with the new data
+                    document.querySelector('.result-div').innerHTML = `
+                <div>
+                    <p>Total Load</p>
+                    <p>${data.total_daily_energy_consumption_kWh} kWh</p>
+                </div>
+                <div>
+                    <p>Number of Panels</p>
+                    <p>${data.number_of_solar_panels_needed}</p>
+                </div>
+                <div>
+                    <p>Number of Batteries</p>
+                    <p>${data.number_of_batteries_needed}</p>
+                </div>
+            `;
+
+                    // Display the results section
+                    document.querySelector('.result').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        };
+
+        // Close button handler
+        document.querySelector('#close-btn').onclick = function () {
+            document.querySelector('.result').style.display = 'none';
+        };
+    });
+
+</script>
+
+</html>
